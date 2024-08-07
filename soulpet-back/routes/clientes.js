@@ -10,6 +10,7 @@ export const clientesRouter = Router();
 clientesRouter.get("/clientes", async (req, res) => {
     // findAll é como se fosse o SELECT * FROM clientes do MySQL 
     const listaClientes = await Cliente.findAll();
+    // const listaClientes = await Cliente.findAll({include: [Pet]});
     res.send(listaClientes);
 });
 

@@ -8,7 +8,8 @@ export const petsRouter = Router();
 
 // [GET] /pets -> listar todos os pets
 petsRouter.get("/pets", async (req, res) => {
-    const listaPets = await Pet.findAll();
+    // const listaPets = await Pet.findAll();
+    const listaPets = await Pet.findAll({include: [Cliente]});
     res.send(listaPets);
 });
 
@@ -67,11 +68,10 @@ petsRouter.post("/pets", async (req, res) => {
 
 // [PUT] /pets/: id -> Atualizar um pet
 petsRouter.put("/pets/:id", async (req, res) => {
-    const idPet = req.params.id;
-    const {nome, tipo, porte, dataNasc} = req.body // aqui não deixa atualizar o cliente, removemos o clienteId
+    const { nome, tipo, porte, dataNasc } = req.body; // aqui não deixa atualizar o cliente, removemos o clienteId
 
     try {
-        const pet = await Pet.findOne({ where: { id: idPet } });
+      const pet = await Pet.findByPk(req.params.id);
         // const pet = aeait Pet.findByPk(req.params.id); também poderia usar e não precisaria da linha const idPet
         if(pet) {
             await pet.update({nome, tipo, porte, dataNasc}); // removemos o clienteId para não atualizar essa parte

@@ -1,6 +1,8 @@
 import { Button } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { getClientes } from "../api/clientes";
+import { useEffect, useState } from "react";
 import { addPet } from "../api/pets";
 import toast from "react-hot-toast";
 
@@ -13,18 +15,34 @@ function NovoPet() {
 
   const navigate = useNavigate();
 
+  const[clientes, setClientes] = useState([]);
+
   function salvarPet(data) {
+    if(data.dataNasc === "") data.dataNasc = null;
+
     addPet(data).then((resposta) => {
       toast.success(resposta.message);
       navigate("/pets");
     }).catch((err) => {
-      toast.error(err.response.data.message);
+      console.log(err);
+    });
+  }
+  
+  // Para usar no Select de Clientes do Formulário
+  function carregarClientes() { 
+    getClientes().then((dados) => {
+      setClientes(dados);
     });
   }
 
+  // Assim que o usuário entrar na página vai realizar esse carregamento de clientes 1x
+  useEffect(() => { 
+    carregarClientes();
+  }, []);
+
   return (
     <main className="mt-4 container">
-      <h1>Novo Pet</h1>
+      <h1>Novo pet</h1>
       <hr />
       <form onSubmit={handleSubmit(salvarPet)}>
         <div>
@@ -33,58 +51,65 @@ function NovoPet() {
             type="text"
             id="nome"
             className="form-control"
-            {...register("nome", { required: true, maxLength: 90 })}
+            {...register("nome", { required: true, maxLength: 200 })}
           />
           {errors.nome && (
             <small className="text-danger">O nome é inválido!</small>
           )}
         </div>
         <div>
-        <label htmlFor="nome">Tipo</label>
+          <label htmlFor="tipo">Tipo</label>
           <input
             type="text"
             id="tipo"
             className="form-control"
-            {...register("tipo", { required: true, maxLength: 100 })}
+            {...register("tipo", { required: true, maxLength: 200 })}
           />
           {errors.tipo && (
             <small className="text-danger">O tipo é inválido!</small>
           )}
         </div>
         <div>
-        <label htmlFor="porte">Porte</label>
+          <label htmlFor="porte">Porte</label>
           <input
             type="text"
             id="porte"
             className="form-control"
-            {...register("porte", { required: true, maxLength: 30 })}
+            {...register("porte", { required: true, maxLength: 200 })}
           />
           {errors.porte && (
             <small className="text-danger">O porte é inválido!</small>
           )}
         </div>
         <div>
-        <label htmlFor="dataNasc">Data de Nascimento</label>
+          <label htmlFor="dataNasc">Data Nascimento</label>
           <input
             type="date"
             id="dataNasc"
             className="form-control"
-            {...register("dataNasc", { required: true, maxLength: 30 })}
+            {...register("dataNasc")}
           />
           {errors.dataNasc && (
             <small className="text-danger">A data é inválida!</small>
           )}
         </div>
         <div>
-        <label htmlFor="clienteId">Cliente</label>
-          <input
-            type="text"
-            id="clienteId"
-            className="form-control"
-            {...register("clienteId", { required: true, maxLength: 150 })}
-          />
-          {errors.cliente && (
-            <small className="text-danger">O cliente é inválido!</small>
+          <label htmlFor="clienteId">Cliente</label>
+          <select
+            className="form-select"
+            {...register("clienteId", { required: true, valueAsNumber: true })}
+          >
+            <option value="">Selecione um cliente</option>
+            {clientes.map((cliente) => { // Para inserir opções dinâmicas do cliente 
+              return ( // value é o id do cliente, mas o que vai aparecer será o nome
+                <option key={cliente.id} value={cliente.id}> 
+                  {cliente.nome} - {cliente.email}
+                </option>
+              );
+            })}
+          </select>
+          {errors.clienteId && (
+            <small className="text-danger">Selecione um cliente</small>
           )}
         </div>
         <Button className="mt-3" type="submit">
